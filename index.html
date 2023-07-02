@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Processing Tool</title>
+</head>
+<body>
+  <div class="container">
+    <div class="image-container">
+      <input type="file" id="image-upload" accept="image/*">
+      <img id="image-preview" alt="Preview" style="max-width: 500px;">
+    </div>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <div class="operation-container">
+      <select id="operation-select">
+        <option value="">Select Operation</option>
+        <option value="brightness">Brightness</option>
+        <option value="contrast">Contrast</option>
+        <option value="saturation">Saturation</option>
+      </select>
+
+      <div id="parameter-container" class="parameter-container">
+        <label for="parameter-range">Parameter:</label>
+        <input type="range" id="parameter-range" min="-100" max="100" value="0" step="1">
+        <span id="parameter-value">0</span>
+      </div>
+    </div>
+
+    <select id="filter-select">
+      <option value="">Select Filter</option>
+      <option value="original">Original</option>
+      <option value="inverted">Inverted</option>
+      <option value="grayscale">Grayscale</option>
+      <option value="sepia">Sepia</option>
+
+    </select>
+
+    <div class="button-container">
+      <button id="apply-button" >Apply</button>
+      <button id="save-button" >Save</button>
+    </div>
+  </div>
+  
+
+
+  <script type="module" src="main.js"></script>
+  <script type="module" src="picture.js"></script>
+
+
+</body>
+</html>
