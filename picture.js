@@ -11,13 +11,11 @@ export class Picture {
 
   // Load the image from the specified URL
   load() {
-    const imagePreview = document.getElementById('image-preview');
     const colorPicker = document.getElementById('color-picker');
 
     // Add event listener to the image element
-    imagePreview.addEventListener('click', (event) => {
-      const color = this.getPixel(event, colorPicker);
-    });
+    this.canvas.addEventListener('click', event => this.getPixel(event, colorPicker));
+
 
     this.img.onload = () => {
       this.width = this.img.width;
@@ -26,7 +24,8 @@ export class Picture {
       this.canvas.width = this.width;
       this.canvas.height = this.height;
       this.context.drawImage(this.img, 0, 0, this.width, this.height);
-      this.context.willReadFrequently = true;
+      // Store pixel data when the image is loaded
+      this.imageData = this.context.getImageData(0, 0, this.width, this.height);
     };
     this.img.src = this.url;
 
@@ -46,18 +45,18 @@ export class Picture {
   }
 
   getPixel(event, destination) {
-    const bounding = this.canvas.getBoundingClientRect();
-    const x = event.clientX - bounding.left;
-    const y = event.clientY - bounding.top;
+    const x = event.offsetX;
+    const y = event.offsetY;
     const pixel = this.context.getImageData(x, y, 1, 1);
     const data = pixel.data;
+
+    console.log(x, y);
 
     const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
     destination.style.background = rgba;
     destination.textContent = rgba;
 
     return rgba;
-
   }
 
   clear() {
