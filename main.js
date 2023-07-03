@@ -10,6 +10,19 @@ const main = () => {
   const applyButton = document.getElementById('apply-button');
   const saveButton = document.getElementById('save-button');
 
+  const colorPickerResult = document.getElementById('color-picker-result'); // Add this line
+
+  // Load the selected image
+  imagePreview.onload = () => {
+    picture.load();
+  };
+
+  // Color picker functionality
+  canvas.addEventListener('click', (event) => {
+    const pickedColor = picture.getPixel(event, colorPickerResult);
+    console.log('Picked Color:', pickedColor);
+  });
+
   const filterSelect = document.getElementById("filter-select");
   filterSelect.addEventListener("change", (evt) => {
     const selectedFilter = evt.target.value;
