@@ -50,8 +50,6 @@ export class Picture {
     const pixel = this.context.getImageData(x, y, 1, 1);
     const data = pixel.data;
 
-    console.log(x, y);
-
     const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
     destination.style.background = rgba;
     destination.textContent = rgba;
