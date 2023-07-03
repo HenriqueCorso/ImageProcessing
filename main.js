@@ -3,25 +3,17 @@ import { Picture } from './picture.js';
 
 const main = () => {
   const imageUpload = document.getElementById('image-upload');
-  const imagePreview = document.getElementById('image-preview');
   const operationSelect = document.getElementById('operation-select');
   const parameterRange = document.getElementById('parameter-range');
   const parameterValue = document.getElementById('parameter-value');
   const applyButton = document.getElementById('apply-button');
   const saveButton = document.getElementById('save-button');
-
-  const colorPickerResult = document.getElementById('color-picker-result'); // Add this line
+  const canvas = document.getElementById('canvas');
 
   // Load the selected image
-  imagePreview.onload = () => {
+  canvas.onload = () => {
     picture.load();
   };
-
-  // Color picker functionality
-  canvas.addEventListener('click', (event) => {
-    const pickedColor = picture.getPixel(event, colorPickerResult);
-    console.log('Picked Color:', pickedColor);
-  });
 
   const filterSelect = document.getElementById("filter-select");
   filterSelect.addEventListener("change", (evt) => {
@@ -38,9 +30,9 @@ const main = () => {
 
     reader.onload = (readerEvent) => {
       const imageUrl = readerEvent.target.result;
-      imagePreview.src = imageUrl;
+      canvas.src = imageUrl;
 
-      picture = new Picture(imageUrl, imagePreview.naturalWidth, imagePreview.naturalHeight);
+      picture = new Picture(imageUrl, canvas.naturalWidth, canvas.naturalHeight);
       picture.load();
     };
 
@@ -66,14 +58,14 @@ const main = () => {
     }
 
     // Update image preview
-    const canvas = document.createElement('canvas');
+
     canvas.width = picture.width;
     canvas.height = picture.height;
 
     const ctx = canvas.getContext('2d');
     ctx.putImageData(picture.getImageData(), 0, 0);
 
-    imagePreview.src = canvas.toDataURL();
+    canvas.src = canvas.toDataURL();
   });
 
   // Save the modified image when Save button is clicked
