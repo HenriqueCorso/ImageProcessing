@@ -11,6 +11,14 @@ export class Picture {
 
   // Load the image from the specified URL
   load() {
+    const imagePreview = document.getElementById('image-preview');
+    const colorPicker = document.getElementById('color-picker');
+
+    // Add event listener to the image element
+    imagePreview.addEventListener('click', (event) => {
+      const color = this.getPixel(event, colorPicker);
+    });
+
     this.img.onload = () => {
       this.width = this.img.width;
       this.height = this.img.height;
@@ -21,6 +29,7 @@ export class Picture {
       this.context.willReadFrequently = true;
     };
     this.img.src = this.url;
+
   }
 
   // Save the modified image as a PNG file
@@ -36,7 +45,19 @@ export class Picture {
   setPixel(x, y, rgba) {
   }
 
-  getPixel(x, y) {
+  getPixel(event, destination) {
+    const bounding = this.canvas.getBoundingClientRect();
+    const x = event.clientX - bounding.left;
+    const y = event.clientY - bounding.top;
+    const pixel = this.context.getImageData(x, y, 1, 1);
+    const data = pixel.data;
+
+    const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+    destination.style.background = rgba;
+    destination.textContent = rgba;
+
+    return rgba;
+
   }
 
   clear() {
@@ -141,6 +162,66 @@ export class Picture {
 
     }
 
+    const sunset = () => {
+      this.context.drawImage(this.img, 0, 0);
+      const imageData = this.context.getImageData(0, 0, this.width, this.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i + 1] = data[i] + 50;        // Increase green component
+        data[i + 2] = data[i + 2] + 12;    // Increase blue component
+      }
+      this.context.putImageData(imageData, 0, 0);
+    }
+
+    const haze = () => {
+      this.context.drawImage(this.img, 0, 0);
+      const imageData = this.context.getImageData(0, 0, this.width, this.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] += 90
+        data[i + 1] += 90
+        data[i + 2] += 10
+      }
+      this.context.putImageData(imageData, 0, 0);
+
+    }
+
+    const serenity = () => {
+      this.context.drawImage(this.img, 0, 0);
+      const imageData = this.context.getImageData(0, 0, this.width, this.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] += 10
+        data[i + 1] += 40
+        data[i + 2] += 90
+      }
+      this.context.putImageData(imageData, 0, 0);
+
+    }
+
+    const vintage = () => {
+      this.context.drawImage(this.img, 0, 0);
+      const imageData = this.context.getImageData(0, 0, this.width, this.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] += 120
+        data[i + 1] += 70
+        data[i + 2] += 13
+      }
+      this.context.putImageData(imageData, 0, 0);
+
+    }
+
+    const lemon = () => {
+      this.context.drawImage(this.img, 0, 0);
+      const imageData = this.context.getImageData(0, 0, this.width, this.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i + 1] = data[i] + 50;
+      }
+      this.context.putImageData(imageData, 0, 0);
+    }
+
     // Switch case to apply the selected filter
     switch (filterType) {
       case "inverted":
@@ -151,6 +232,21 @@ export class Picture {
         break;
       case "sepia":
         sepia();
+        break;
+      case 'sunset':
+        sunset();
+        break;
+      case 'haze':
+        haze();
+        break;
+      case 'serenity':
+        serenity();
+        break;
+      case 'vintage':
+        vintage();
+        break;
+      case 'lemon':
+        lemon();
         break;
       default:
         original();
