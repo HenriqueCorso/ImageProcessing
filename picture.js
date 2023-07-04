@@ -24,8 +24,6 @@ export class Picture {
       this.canvas.width = this.width;
       this.canvas.height = this.height;
       this.context.drawImage(this.img, 0, 0, this.width, this.height);
-      // Store pixel data when the image is loaded
-      this.imageData = this.context.getImageData(0, 0, this.width, this.height);
     };
     this.img.src = this.url;
 
@@ -250,8 +248,4 @@ export class Picture {
     }
   }
 
-  // Get the image data of the modified image
-  getImageData() {
-    return this.context.getImageData(0, 0, this.width, this.height);
-  }
 }
