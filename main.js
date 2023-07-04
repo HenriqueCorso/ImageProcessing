@@ -10,14 +10,15 @@ const main = () => {
   const saveButton = document.getElementById('save-button');
   const canvas = document.getElementById('canvas');
 
+
   // Load the selected image
   canvas.onload = () => {
     picture.load();
   };
 
   const filterSelect = document.getElementById("filter-select");
-  filterSelect.addEventListener("change", (evt) => {
-    const selectedFilter = evt.target.value;
+  filterSelect.addEventListener("change", (event) => {
+    const selectedFilter = event.target.value;
     picture.applyFilter(selectedFilter);
   });
 
@@ -39,6 +40,7 @@ const main = () => {
     reader.readAsDataURL(file);
   });
 
+
   // Update parameter value
   parameterRange.addEventListener('input', () => {
     parameterValue.textContent = parameterRange.value;
@@ -57,22 +59,12 @@ const main = () => {
       picture.saturation(parameter);
     }
 
-    // Update image preview
-
-    canvas.width = picture.width;
-    canvas.height = picture.height;
-
-    const ctx = canvas.getContext('2d');
-    ctx.putImageData(picture.getImageData(), 0, 0);
-
-    canvas.src = canvas.toDataURL();
   });
 
   // Save the modified image when Save button is clicked
   saveButton.addEventListener('click', () => {
     picture.save();
   });
-
 
 }
 
