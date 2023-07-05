@@ -111,6 +111,59 @@ export class Picture {
     this.context.putImageData(imageData, 0, 0);
   }
 
+  // Apply Gaussian blur filter to the image
+  gaussianBlur() {
+    const imageData = this.context.getImageData(0, 0, this.width, this.height);
+    const pixels = imageData.data;
+    const width = imageData.width;
+
+    const radius = 5;
+    const sigma = 2;
+    const kernelSize = radius * 2 + 1;
+    const kernel = new Array(kernelSize);
+    let kernelSum = 0;
+
+    for (let i = 0; i < kernelSize; i++) {
+      kernel[i] = new Array(kernelSize);
+      for (let j = 0; j < kernelSize; j++) {
+        const distance = (i - radius) * (i - radius) + (j - radius) * (j - radius);
+        kernel[i][j] = Math.exp(-distance / (2 * sigma * sigma));
+        kernelSum += kernel[i][j];
+      }
+    }
+
+    for (let i = 0; i < kernelSize; i++) {
+      for (let j = 0; j < kernelSize; j++) {
+        kernel[i][j] /= kernelSum;
+      }
+    }
+
+    for (let y = radius; y < this.height - radius; y++) {
+      for (let x = radius; x < this.width - radius; x++) {
+        let r = 0, g = 0, b = 0, a = 0;
+
+        for (let i = -radius; i <= radius; i++) {
+          for (let j = -radius; j <= radius; j++) {
+            const pixelIndex = ((y + i) * width + x + j) * 4;
+            r += pixels[pixelIndex] * kernel[i + radius][j + radius];
+            g += pixels[pixelIndex + 1] * kernel[i + radius][j + radius];
+            b += pixels[pixelIndex + 2] * kernel[i + radius][j + radius];
+            a += pixels[pixelIndex + 3] * kernel[i + radius][j + radius];
+          }
+        }
+
+        const pixelIndex = (y * width + x) * 4;
+        pixels[pixelIndex] = r;
+        pixels[pixelIndex + 1] = g;
+        pixels[pixelIndex + 2] = b;
+        pixels[pixelIndex + 3] = a;
+      }
+    }
+
+    this.context.putImageData(imageData, 0, 0);
+  }
+
+
   applyFilter(filterType) {
     const ctx = this.context;
     const canvas = this.canvas;
@@ -224,6 +277,54 @@ export class Picture {
       this.context.putImageData(imageData, 0, 0);
     }
 
+    const edgeDetection = [
+      [-1, -1, -1],
+      [-1, 8, -1],
+      [-1, -1, -1]
+    ];
+
+
+    const sharpen = [
+      [0, -1, 0],
+      [-1, 5, -1],
+      [0, -1, 0]
+    ];
+
+    const boxBlur = [
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1]
+    ];
+
+    const focus = [
+      [-1, 0, -1],
+      [0, 7, 0],
+      [-1, 0, -1]
+    ];
+
+    const emboss = [
+      [-2, -1, 0],
+      [-1, 1, 1],
+      [0, 1, 2]
+    ];
+
+    const focus5x5 = [
+      [-1, -1, -1, -1, -1],
+      [-1, 1, 1, 1, -1],
+      [-1, 1, 8, 1, -1],
+      [-1, 1, 1, 1, -1],
+      [-1, -1, -1, -1, -1]
+    ];
+
+    const gradientEmboss = [
+      [-2, -2, -2, -2, -2],
+      [-1, -1, -1, -1, -1],
+      [0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1],
+      [2, 2, 2, 2, 2]
+    ];
+
+
     // Switch case to apply the selected filter
     switch (filterType) {
       case "inverted":
@@ -250,9 +351,98 @@ export class Picture {
       case 'lemon':
         lemon();
         break;
+      case 'gaussianBlur':
+        this.gaussianBlur();
+        break;
+      case 'edgeDetection':
+        this.applyConvolutionFilter(edgeDetection, 1, 0);
+        break;
+      case 'sharpen':
+        this.applyConvolutionFilter(sharpen, 1, 0);
+        break;
+      case 'boxBlur':
+        this.applyConvolutionFilter(boxBlur, 9, 0);
+        break;
+      case 'focus':
+        this.applyConvolutionFilter(focus, 1, 0);
+        break;
+      case 'emboss':
+        this.applyConvolutionFilter(emboss, 1, 0);
+        break;
+      case 'focus5x5':
+        this.applyConvolutionFilter(focus5x5, 1, 0);
+        break;
+      case 'gradientEmboss':
+        this.applyConvolutionFilter(gradientEmboss, 1, 0);
+        break;
       default:
         original();
     }
+  }
+
+
+  applyConvolutionFilter(kernel, divisor = 1, offset = 0, opaque = true) {
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    const src = {
+      width: imageData.width,
+      height: imageData.height,
+      data: new Uint8ClampedArray(imageData.data)
+    };
+
+    const dst = new ImageData(src.width, src.height);
+
+    const dstBuf = dst.data;
+    const srcBuf = src.data;
+
+    const rowOffset = Math.floor(kernel.length / 2);
+    const colOffset = Math.floor(kernel[0].length / 2);
+
+    for (let row = 0; row < src.height; row++) {
+      for (let col = 0; col < src.width; col++) {
+        const result = [0, 0, 0, 0];
+
+        for (let kRow = 0; kRow < kernel.length; kRow++) {
+          for (let kCol = 0; kCol < kernel[kRow].length; kCol++) {
+            const kVal = kernel[kRow][kCol];
+
+            const pixelRow = row + kRow - rowOffset;
+            const pixelCol = col + kCol - colOffset;
+
+            if (
+              pixelRow < 0 ||
+              pixelRow >= src.height ||
+              pixelCol < 0 ||
+              pixelCol >= src.width
+            ) {
+              continue;
+            }
+
+            const srcIndex = (pixelRow * src.width + pixelCol) * 4;
+
+            for (let channel = 0; channel < 4; channel++) {
+              if (opaque && channel === 3) {
+                continue;
+              } else {
+                const pixel = srcBuf[srcIndex + channel];
+                result[channel] += pixel * kVal;
+              }
+            }
+          }
+        }
+
+        const dstIndex = (row * src.width + col) * 4;
+
+        for (let channel = 0; channel < 4; channel++) {
+          const val = (opaque && channel === 3) ? 255 : result[channel] / divisor + offset;
+          dstBuf[dstIndex + channel] = val;
+        }
+      }
+    }
+
+    ctx.putImageData(dst, 0, 0);
   }
 
 }
