@@ -1,6 +1,5 @@
 import { Picture } from './picture.js';
 
-
 const main = () => {
   const imageUpload = document.getElementById('image-upload');
   const operationSelect = document.getElementById('operation-select');
@@ -9,20 +8,22 @@ const main = () => {
   const applyButton = document.getElementById('apply-button');
   const saveButton = document.getElementById('save-button');
   const canvas = document.getElementById('canvas');
+  const brushButton = document.getElementById('brush-button');
 
+  let picture = null;
+  let brushActive = false; // Track if the brush tool is active
+  let brushColor = null; // Store the brush color
 
   // Load the selected image
   canvas.onload = () => {
     picture.load();
   };
 
-  const filterSelect = document.getElementById("filter-select");
-  filterSelect.addEventListener("change", (event) => {
+  const filterSelect = document.getElementById('filter-select');
+  filterSelect.addEventListener('change', (event) => {
     const selectedFilter = event.target.value;
     picture.applyFilter(selectedFilter);
   });
-
-  let picture = null;
 
   // Load image when user selects a file
   imageUpload.addEventListener('change', (event) => {
@@ -39,7 +40,6 @@ const main = () => {
 
     reader.readAsDataURL(file);
   });
-
 
   // Update parameter value
   parameterRange.addEventListener('input', () => {
@@ -58,7 +58,6 @@ const main = () => {
     } else if (operation === 'saturation') {
       picture.saturation(parameter);
     }
-
   });
 
   // Save the modified image when Save button is clicked
@@ -66,6 +65,48 @@ const main = () => {
     picture.save();
   });
 
-}
+  // Toggle brush tool
+  brushButton.addEventListener('click', () => {
+    brushActive = !brushActive;
+    brushButton.textContent = brushActive ? 'Deactivate setPixel' : 'Activate setPixel';
+  });
+
+  // Handle mouse move event on the canvas
+  canvas.addEventListener('mousemove', (event) => {
+    if (brushActive) {
+      const colorPicker = document.getElementById('color-picker');
+      const rgba = picture.getPixel(event, colorPicker);
+
+      // Update the brush color
+      brushColor = rgba;
+      canvas.style.cursor = 'crosshair';
+    }
+  });
+
+  // Handle mouse down event on the canvas
+  canvas.addEventListener('mousedown', () => {
+    if (brushActive) {
+      canvas.addEventListener('mousemove', brush);
+      brush(event);
+    }
+  });
+
+  // Handle mouse up event on the canvas
+  canvas.addEventListener('mouseup', () => {
+    if (brushActive) {
+      canvas.removeEventListener('mousemove', brush);
+      brush(event);
+      brushColor = null; // Reset brush color
+      canvas.style.cursor = 'default';
+    }
+  });
+
+  // Brush function to paint on the canvas
+  const brush = (event) => {
+    if (brushColor) {
+      picture.setPixel(event.offsetX, event.offsetY, brushColor);
+    }
+  };
+};
 
 main();
