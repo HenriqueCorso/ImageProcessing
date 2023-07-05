@@ -40,6 +40,13 @@ export class Picture {
 
 
   setPixel(x, y, rgba) {
+    const imageData = this.context.getImageData(0, 0, this.width, this.height);
+    const index = (y * this.width + x) * 4;
+    imageData.data[index] = rgba[0];   // Red
+    imageData.data[index + 1] = rgba[1]; // Green
+    imageData.data[index + 2] = rgba[2]; // Blue
+    imageData.data[index + 3] = rgba[3]; // Alpha
+    this.context.putImageData(imageData, 0, 0);
   }
 
   getPixel(event, destination) {
