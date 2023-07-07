@@ -11,10 +11,10 @@ export class Picture {
 
   // Load the image from the specified URL
   load() {
-    const colorPicker = document.getElementById('color-picker');
+    const colorPicked = document.getElementById('color-picked');
 
     // Add event listener to the image element
-    this.canvas.addEventListener('click', event => this.getPixel(event, colorPicker));
+    this.canvas.addEventListener('click', event => this.getPixel(event, colorPicked));
 
 
     this.img.onload = () => {
@@ -55,9 +55,13 @@ export class Picture {
     const pixel = this.context.getImageData(x, y, 1, 1);
     const data = pixel.data;
 
-    const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
-    destination.style.background = rgba;
-    destination.textContent = rgba;
+    const color = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+
+    const rgba = [data[0], data[1], data[2], data[3]];
+    destination.style.background = color;
+    destination.textContent = color;
+
+    console.log(rgba);
 
     return rgba;
   }
@@ -308,22 +312,6 @@ export class Picture {
       [0, 1, 2]
     ];
 
-    const focus5x5 = [
-      [-1, -1, -1, -1, -1],
-      [-1, 1, 1, 1, -1],
-      [-1, 1, 8, 1, -1],
-      [-1, 1, 1, 1, -1],
-      [-1, -1, -1, -1, -1]
-    ];
-
-    const gradientEmboss = [
-      [-2, -2, -2, -2, -2],
-      [-1, -1, -1, -1, -1],
-      [0, 0, 0, 0, 0],
-      [1, 1, 1, 1, 1],
-      [2, 2, 2, 2, 2]
-    ];
-
 
     // Switch case to apply the selected filter
     switch (filterType) {
@@ -368,12 +356,6 @@ export class Picture {
         break;
       case 'emboss':
         this.applyConvolutionFilter(emboss, 1, 0);
-        break;
-      case 'focus5x5':
-        this.applyConvolutionFilter(focus5x5, 1, 0);
-        break;
-      case 'gradientEmboss':
-        this.applyConvolutionFilter(gradientEmboss, 1, 0);
         break;
       default:
         original();
@@ -444,5 +426,6 @@ export class Picture {
 
     ctx.putImageData(dst, 0, 0);
   }
+
 
 }
