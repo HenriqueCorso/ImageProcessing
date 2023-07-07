@@ -74,8 +74,8 @@ const main = () => {
   // Handle mouse move event on the canvas
   canvas.addEventListener('mousemove', (event) => {
     if (brushActive) {
-      const colorPicker = document.getElementById('color-picker');
-      const rgba = picture.getPixel(event, colorPicker);
+      const colorPicked = document.getElementById('color-picked');
+      const rgba = picture.getPixel(event, colorPicked);
 
       // Update the brush color
       brushColor = rgba;
